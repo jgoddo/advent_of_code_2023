@@ -1,0 +1,7 @@
+.idea
+*.pyc
+*.egg-info
+__pycache__
+venv
+puzzle_inputs
+credentials.py
