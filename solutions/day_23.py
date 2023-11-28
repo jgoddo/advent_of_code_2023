@@ -17,14 +17,14 @@ def part_2(part_input):
 
 if __name__ == '__main__':
     puzzle_input = aoc_helpers.get_puzzle_input(year=YEAR, day=DAY, readlines=False)
-    for (test_case, solution) in TEST_CASES_1:
+    for test_case, solution in TEST_CASES_1:
         test_result = part_1(test_case)
         assert test_result == solution, f'{test_result} != {solution}'
     res_1 = part_1(puzzle_input)
     print('Solution for part 1 is: ', res_1)
     # aoc_helpers.post_answer(res_1, DAY, 1, year=YEAR)
-    
-    for (test_case, solution) in TEST_CASES_2:
+
+    for test_case, solution in TEST_CASES_2:
         test_result = part_2(test_case)
         assert test_result == solution, f'{test_result} != {solution}'
 

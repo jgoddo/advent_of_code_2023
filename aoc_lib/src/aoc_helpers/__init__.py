@@ -6,9 +6,10 @@ import requests
 from aoc_helpers import credentials
 
 session = credentials.get_session()
-storage_dir = pathlib.Path(__file__).parent.parent.parent.parent / 'puzzle_inputs'#credentials.get_storage_dir()
+storage_dir = pathlib.Path(__file__).parent.parent.parent.parent / 'puzzle_inputs'  # credentials.get_storage_dir()
 
 print(storage_dir)
+
 
 def get_puzzle_lines(day: int, year: int = None, force: bool = False):
     return get_puzzle_input(day, year, force, True)
@@ -17,7 +18,7 @@ def get_puzzle_lines(day: int, year: int = None, force: bool = False):
 def get_puzzle_input(day: int, year: int = None, force: bool = False, readlines=False):
     if year is None:
         year = get_year()
-    curr_folder = (storage_dir / f'{year:4d}')
+    curr_folder = storage_dir / f'{year:4d}'
     curr_folder.mkdir(exist_ok=True, parents=True)
     filepath = curr_folder / f'input_{day:02d}'
 
@@ -44,8 +45,11 @@ def post_answer(answer: str, day: int, part: int, year: int = None):
     if year is None:
         year = get_year()
 
-    response = requests.post(f'https://adventofcode.com/{year}/day/{day}/answer', cookies={'session': session},
-                             data={'level': part, 'answer': answer})
+    response = requests.post(
+        f'https://adventofcode.com/{year}/day/{day}/answer',
+        cookies={'session': session},
+        data={'level': part, 'answer': answer},
+    )
     if not response.ok:
         print(response.content)
         raise Exception()

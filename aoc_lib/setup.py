@@ -1,10 +1,6 @@
 import setuptools
 
-install_deps = [
-    'requests',
-    'beautifulsoup4',
-    'html5lib'
-]
+install_deps = ['requests', 'beautifulsoup4', 'html5lib']
 
 setuptools.setup(
     name="aoc_helpers",
