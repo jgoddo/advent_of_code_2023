@@ -65,7 +65,7 @@ def part_2(part_input):
         for idx in range(1, height):
             # iterate over rows
             diffs = [sum(a1 != b1 for a1, b1 in zip(a, b)) for a, b in zip(reversed(group[:idx]), group[idx:])]
-            if max(diffs) == 1:  #  all(a == b for a, b in zip(reversed(group[:idx]), group[idx:])):
+            if max(diffs) == 1:
                 center_found = True
                 solution += 100 * idx
                 break
@@ -78,7 +78,6 @@ def part_2(part_input):
             for idx in range(1, width):
                 diffs = [sum(a1 != b1 for a1, b1 in zip(a, b)) for a, b in zip(reversed(cols[:idx]), cols[idx:])]
                 if max(diffs) == 1:
-                    # if all(a == b for a, b in zip(reversed(cols[:idx]), cols[idx:])):
                     center_found = True
                     solution += idx
                     break
