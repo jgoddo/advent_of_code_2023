@@ -3,7 +3,7 @@ import math
 
 YEAR = 2023
 DAY = 13
-SKIP_1 = False
+SKIP_1 = True
 TEST_CASES_1 = [
     (
         """#.##..##.
@@ -36,10 +36,7 @@ def part_1(part_input):
         center_found = False
         height = len(group)
         for idx in range(1, height):
-            # print(idx, list(reversed(group[:idx]), group[idx])
-
             if all(a == b for a, b in zip(reversed(group[:idx]), group[idx:])):
-                print(group, idx)
                 center_found = True
                 solution += 100 * idx
                 break
@@ -53,8 +50,6 @@ def part_1(part_input):
                     center_found = True
                     solution += idx
                     break
-            pass
-            # iterate over columns
 
     print(solution)
     return solution
@@ -62,7 +57,35 @@ def part_1(part_input):
 
 def part_2(part_input):
     part_input = part_input.strip().split('\n\n')
-    return 'not solved'
+    solution = 0
+    for group in part_input:
+        group = group.split('\n')
+        center_found = False
+        height = len(group)
+        for idx in range(1, height):
+            # iterate over rows
+            diffs = [sum(a1 != b1 for a1, b1 in zip(a, b)) for a, b in zip(reversed(group[:idx]), group[idx:])]
+            if max(diffs) == 1:  #  all(a == b for a, b in zip(reversed(group[:idx]), group[idx:])):
+                center_found = True
+                solution += 100 * idx
+                break
+
+        if not center_found:
+            # iterate over columns
+
+            width = len(group[0])
+            cols = [''.join(row[idx] for row in group) for idx in range(width)]
+            for idx in range(1, width):
+                diffs = [sum(a1 != b1 for a1, b1 in zip(a, b)) for a, b in zip(reversed(cols[:idx]), cols[idx:])]
+                if max(diffs) == 1:
+                    # if all(a == b for a, b in zip(reversed(cols[:idx]), cols[idx:])):
+                    center_found = True
+                    solution += idx
+                    break
+            pass
+
+    print(solution)
+    return solution
 
 
 if __name__ == '__main__':
