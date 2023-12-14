@@ -102,86 +102,57 @@ def part_2(part_input):
 
     print('-' * 64)
 
-    directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]  # north, then west, then south, then east
+    roller_states = []
 
     step = 0
-    anything_moved = True
-    nothing_moved_list = [True, True, True, True]
-    for step in tqdm.trange(0, 5):  # _000_000_000):
-        print(step)
-        print_board(rollers, solids, height, width)
-        print('#' * 64)
-        for direction_idx in range(4):
-            while anything_moved:
-                new_rollers = set()
-                anything_moved = False
 
-                if direction_idx == 0:
-                    if all(nothing_moved_list) and step != 0:
-                        print('could abort')
-                    nothing_moved_list = [False, False, False, False]
-                    it = sorted(rollers)
-                elif direction_idx == 1:
-                    it = sorted(rollers, key=lambda x: x[1])
-                elif direction_idx == 2:
-                    it = sorted(rollers, reverse=True)
-                elif direction_idx == 3:
-                    it = sorted(rollers, key=lambda x: x[1], reverse=True)
+    while True:
+        rollers = move(rollers, solids, height, width)
+        if rollers in roller_states:
+            break
 
-                for y, x in it:
-                    dy, dx = directions[direction_idx]
-                    ny, nx = y + dy, x + dx
-                    if (
-                        (ny, nx) in new_rollers
-                        or (ny, nx) in solids
-                        or (ny < 0)
-                        or ny > height
-                        or (nx < 0)
-                        or nx > width
-                    ):  # stay
-                        new_rollers.add((y, x))
-                    else:  # move!
-                        anything_moved = True
-                        nothing_moved_list[direction_idx] = True
-                        new_rollers.add((ny, nx))
+        roller_states.append(rollers)
+        step += 1
 
-                rollers = new_rollers
+    pattern_idx = roller_states.index(rollers)
+
+    cycle_length = step - pattern_idx
+    initial_steps = pattern_idx + 1
+    step = (1_000_000_000 - initial_steps) % (cycle_length)
+    for _ in range(step):
+        rollers = move(rollers, solids, height, width)
 
     solution = sum(height - y for y, _ in rollers)
-    # print(rollers, solids)
-    # print_board(rollers, solids, height, width)
-    return solution
+    return solution  # 88117 too low
 
 
-import functools
+def move(rollers, solids, height, width):
+    directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]  # north, then west, then south, then east
+    for direction_idx in range(4):
+        anything_moved = True
+        while anything_moved:
+            new_rollers = set()
+            anything_moved = False
 
+            if direction_idx == 0:
+                it = sorted(rollers)
+            elif direction_idx == 1:
+                it = sorted(rollers, key=lambda x: x[1], reverse=False)
+            elif direction_idx == 2:
+                it = sorted(rollers, reverse=True)
+            elif direction_idx == 3:
+                it = sorted(rollers, key=lambda x: x[1], reverse=True)
 
-@functools.cache
-def move(rollers, direction_idx):
-    anything_moved = True
-    while anything_moved:
-        new_rollers = set()
-        anything_moved = False
-
-        if direction_idx == 0:
-            nothing_moved_list = [False, False, False, False]
-            it = sorted(rollers)
-        elif direction_idx == 1:
-            it = sorted(rollers, key=lambda x: x[1])
-        elif direction_idx == 2:
-            it = sorted(rollers, reverse=True)
-        elif direction_idx == 3:
-            it = sorted(rollers, key=lambda x: x[1], reverse=True)
-
-        for y, x in it:
-            dy, dx = directions[direction_idx]
-            ny, nx = y + dy, x + dx
-            if (ny, nx) in new_rollers or (ny, nx) in solids or (ny < 0) or (nx < 0):  # stay
-                new_rollers.add((y, x))
-            else:  # move!
-                anything_moved = True
-                nothing_moved_list[direction_idx] = True
-                new_rollers.add((ny, nx))
+            for y, x in it:
+                dy, dx = directions[direction_idx]
+                ny, nx = y + dy, x + dx
+                if (
+                    (ny, nx) in new_rollers or (ny, nx) in solids or (ny < 0) or ny >= height or (nx < 0) or nx >= width
+                ):  # stay
+                    new_rollers.add((y, x))
+                else:  # move!
+                    anything_moved = True
+                    new_rollers.add((ny, nx))
 
             rollers = new_rollers
     return rollers
