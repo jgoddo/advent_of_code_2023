@@ -107,7 +107,10 @@ def part_2(part_input):
     step = 0
     anything_moved = True
     nothing_moved_list = [True, True, True, True]
-    for step in tqdm.trange(0, 1_000_000_000):
+    for step in tqdm.trange(0, 5):  # _000_000_000):
+        print(step)
+        print_board(rollers, solids, height, width)
+        print('#' * 64)
         for direction_idx in range(4):
             while anything_moved:
                 new_rollers = set()
@@ -128,7 +131,14 @@ def part_2(part_input):
                 for y, x in it:
                     dy, dx = directions[direction_idx]
                     ny, nx = y + dy, x + dx
-                    if (ny, nx) in new_rollers or (ny, nx) in solids or (ny < 0) or (nx < 0):  # stay
+                    if (
+                        (ny, nx) in new_rollers
+                        or (ny, nx) in solids
+                        or (ny < 0)
+                        or ny > height
+                        or (nx < 0)
+                        or nx > width
+                    ):  # stay
                         new_rollers.add((y, x))
                     else:  # move!
                         anything_moved = True
@@ -194,4 +204,4 @@ if __name__ == '__main__':
 
     res_2 = part_2(puzzle_input)
     print('Solution for part 2 is: ', res_2)
-    aoc_helpers.post_answer(res_2, DAY, 2, year=YEAR)
+    # aoc_helpers.post_answer(res_2, DAY, 2, year=YEAR)
