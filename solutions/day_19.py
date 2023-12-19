@@ -62,6 +62,7 @@ def parse_rules(rules):
                         'target': target,
                         'cond': '<',
                         'val': int(checkval),
+                        'raw': cond,
                     }
                 )
             elif '>' in cond:
@@ -72,12 +73,23 @@ def parse_rules(rules):
                         'check': functools.partial(greater, target=int(checkval)),
                         'input': inval,
                         'target': target,
-                        'cond': '<',
+                        'cond': '>',
                         'val': int(checkval),
+                        'raw': cond,
                     }
                 )
             else:
-                c.append({'check': functools.partial(is_true), 'input': 'x', 'target': cond, 'cond': '', 'val': ''})
+                c.append(
+                    {
+                        'check': functools.partial(is_true),
+                        'input': 'x',
+                        'target': cond,
+                        'cond': '',
+                        'val': '',
+                        'raw': cond,
+                    }
+                )
+
         ret[name]['checks'] = c
     return ret
 
@@ -134,47 +146,62 @@ def part_2(part_input):
     accepted = []
 
     while len(to_process):
+        # print(to_process)
         curr_rule, rule_idx, part = to_process.pop(0)
-        # print(part)
+        # print(curr_rule, rule_idx, part)
 
         if curr_rule == 'A':
             accepted.append(part)
-            break
+            continue
         elif curr_rule == 'R':
             print('REJECTED!')
-            break
+            continue
 
         rule = ruleset[curr_rule]['checks'][rule_idx]
         vmin, vmax = part[rule['input']]
 
         if rule['cond'] == '<':
-            if vmin <= rule['val'] - 1:
+            # break up into accepted and not-accepted part (if len(part) > 0)
+            if vmin <= rule['val'] - 1:  #
                 tmp = part.copy()
                 tmp[rule['input']] = (vmin, rule['val'] - 1)
-                to_process.append((curr_rule, rule_idx + 1, tmp))
+                to_process.append((rule['target'], 0, tmp))  # accepted
 
             if rule['val'] <= vmax:
                 tmp = part.copy()
                 tmp[rule['input']] = (rule['val'], vmax)
-                to_process.append((rule['target'], 0, tmp))  # rule_idx
+                to_process.append((curr_rule, rule_idx + 1, tmp))  # not accepted
 
         elif rule['cond'] == '>':
+            if vmin <= rule['val'] - 1:  #
+                tmp = part.copy()
+                tmp[rule['input']] = (vmin, rule['val'])
+                to_process.append((curr_rule, rule_idx + 1, tmp))  # not accepted
+
             if rule['val'] <= vmax:
                 tmp = part.copy()
-                tmp[rule['input']] = (rule['val'], vmax)
-                to_process.append((curr_rule, rule_idx + 1, tmp))
-
-            if vmin <= rule['val'] - 1:
-                tmp = part.copy()
-                tmp[rule['input']] = (vmin, rule['val'] - 1)
-                to_process.append((rule['target'], 0, tmp))  # rule_idx
+                tmp[rule['input']] = (rule['val'] + 1, vmax)
+                to_process.append((rule['target'], 0, tmp))  # accepted
 
         elif rule['cond'] == '':
             tmp = part.copy()
             to_process.append((rule['target'], 0, tmp))
 
-    print(accepted)
-    return 'not solved'
+        # print(curr_rule)
+        # print(rule['raw'])
+        # print(to_process)
+        # print('-' * 64)
+
+    solution = 0
+    for val in accepted:
+        print(val)
+        tmp = 1
+        for v in val.values():
+            tmp *= v[1] - v[0] + 1
+        solution += tmp
+
+    print('part2: ', solution)
+    return solution
 
 
 if __name__ == '__main__':
@@ -183,14 +210,14 @@ if __name__ == '__main__':
     if not SKIP_1:
         for test_case, solution in TEST_CASES_1:
             test_result = part_1(test_case)
-            assert test_result == solution, f'{test_result} != {solution}'
+            assert test_result == solution, f'{test_result} != {solution} | {test_result-solution}'
         res_1 = part_1(puzzle_input)
         print('Solution for part 1 is: ', res_1)
         # aoc_helpers.post_answer(res_1, DAY, 1, year=YEAR)
 
     for test_case, solution in TEST_CASES_2:
         test_result = part_2(test_case)
-        assert test_result == solution, f'{test_result} != {solution}'
+        assert test_result == solution, f'{test_result} != {solution} | {test_result-solution}, {test_result/solution}'
 
     res_2 = part_2(puzzle_input)
     print('Solution for part 2 is: ', res_2)
