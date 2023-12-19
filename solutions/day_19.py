@@ -27,7 +27,7 @@ hdj{m>838:A,pv}
         19114,
     )
 ]
-TEST_CASES_2 = [("""""", 'FAIL')]
+TEST_CASES_2 = [(TEST_CASES_1[0][0], 167409079868000)]
 import functools
 
 
@@ -55,13 +55,29 @@ def parse_rules(rules):
             if '<' in cond:
                 inval, check = cond.split('<')
                 checkval, target = check.split(':')
-                c.append({'check': functools.partial(smaller, target=int(checkval)), 'input': inval, 'target': target})
+                c.append(
+                    {
+                        'check': functools.partial(smaller, target=int(checkval)),
+                        'input': inval,
+                        'target': target,
+                        'cond': '<',
+                        'val': int(checkval),
+                    }
+                )
             elif '>' in cond:
                 inval, check = cond.split('>')
                 checkval, target = check.split(':')
-                c.append({'check': functools.partial(greater, target=int(checkval)), 'input': inval, 'target': target})
+                c.append(
+                    {
+                        'check': functools.partial(greater, target=int(checkval)),
+                        'input': inval,
+                        'target': target,
+                        'cond': '<',
+                        'val': int(checkval),
+                    }
+                )
             else:
-                c.append({'check': functools.partial(is_true), 'input': 'x', 'target': cond})
+                c.append({'check': functools.partial(is_true), 'input': 'x', 'target': cond, 'cond': '', 'val': ''})
         ret[name]['checks'] = c
     return ret
 
@@ -108,11 +124,56 @@ def part_1(part_input):
     return accepted
 
 
-# Consider only your list of workflows; the list of part ratings that the Elves wanted you to sort is no longer relevant. How many distinct combinations of ratings will be accepted by the Elves' workflows?
-
-
 def part_2(part_input):
-    part_input = part_input.strip().split('\n')
+    rules, parts = part_input.strip().split('\n\n')
+    ruleset = parse_rules(rules)
+    # partslist = parse_parts(parts)    # figure out which parts will be accepted in advance
+    # each xmas val can be  1 to a maximum of 4000
+    ranged_part = {'x': (1, 4000), 'm': (1, 4000), 'a': (1, 4000), 's': (1, 4000)}
+    to_process = [('in', 0, ranged_part)]
+    accepted = []
+
+    while len(to_process):
+        curr_rule, rule_idx, part = to_process.pop(0)
+        # print(part)
+
+        if curr_rule == 'A':
+            accepted.append(part)
+            break
+        elif curr_rule == 'R':
+            print('REJECTED!')
+            break
+
+        rule = ruleset[curr_rule]['checks'][rule_idx]
+        vmin, vmax = part[rule['input']]
+
+        if rule['cond'] == '<':
+            if vmin <= rule['val'] - 1:
+                tmp = part.copy()
+                tmp[rule['input']] = (vmin, rule['val'] - 1)
+                to_process.append((curr_rule, rule_idx + 1, tmp))
+
+            if rule['val'] <= vmax:
+                tmp = part.copy()
+                tmp[rule['input']] = (rule['val'], vmax)
+                to_process.append((rule['target'], 0, tmp))  # rule_idx
+
+        elif rule['cond'] == '>':
+            if rule['val'] <= vmax:
+                tmp = part.copy()
+                tmp[rule['input']] = (rule['val'], vmax)
+                to_process.append((curr_rule, rule_idx + 1, tmp))
+
+            if vmin <= rule['val'] - 1:
+                tmp = part.copy()
+                tmp[rule['input']] = (vmin, rule['val'] - 1)
+                to_process.append((rule['target'], 0, tmp))  # rule_idx
+
+        elif rule['cond'] == '':
+            tmp = part.copy()
+            to_process.append((rule['target'], 0, tmp))
+
+    print(accepted)
     return 'not solved'
 
 
